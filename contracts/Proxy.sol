@@ -5,14 +5,16 @@ import "./StorageSlot.sol";
 
 contract Proxy {
     uint x = 0;
-    address implementation;
 
     function changeImplementation(address _implementation) external {
-        implementation = _implementation;
+        StorageSlot.getAddressSlot(keccak256("impl")).value = _implementation;
     }
 
     fallback() external {
-        (bool s, ) = implementation.delegatecall(msg.data);
+        (bool s, ) = StorageSlot
+            .getAddressSlot(keccak256("impl"))
+            .value
+            .delegatecall(msg.data);
         require(s);
     }
 }
