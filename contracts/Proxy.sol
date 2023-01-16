@@ -9,6 +9,11 @@ contract Proxy {
     function changeImplementation(address _implementation) external {
         implementation = _implementation;
     }
+
+    fallback() external {
+        (bool s, ) = implementation.call(msg.data);
+        require(s);
+    }
 }
 
 contract Logic1 {
@@ -24,5 +29,9 @@ contract Logic2 {
 
     function changeX(uint _x) external {
         x = _x * 2;
+    }
+
+    function tripleX() external {
+        x *= 3;
     }
 }
