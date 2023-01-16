@@ -22,6 +22,10 @@ describe('Proxy', function () {
     return { proxy, logic1, logic2, proxyAsLogic1, proxyAsLogic2 }
   }
 
+  async function lookupInt(contractAddr, slot) {
+    return parseInt(await ethers.provider.getStorageAt(contractAddr, slot))
+  }
+
   it('Should work with logic1', async function () {
     const { proxy, logic1, proxyAsLogic1 } = await loadFixture(deployFixture)
 
@@ -29,24 +33,27 @@ describe('Proxy', function () {
 
     await proxy.changeImplementation(logic1.address)
     await proxyAsLogic1.changeX(3)
-    assert.equal(await logic1.x(), 3)
+    assert.equal(await lookupInt(proxy.address, 0x0), 3)
   })
 
   it('Should work with upgrades', async function () {
     const { proxy, logic1, logic2, proxyAsLogic1, proxyAsLogic2 } =
       await loadFixture(deployFixture)
 
-    // console.log(logic1)
+    assert.equal(await lookupInt(proxy.address, 0x0), 0)
 
     await proxy.changeImplementation(logic1.address)
-    await proxyAsLogic1.changeX(3)
-    assert.equal(await logic1.x(), 3)
+    await proxyAsLogic1.changeX(4)
+
+    assert.equal(await lookupInt(proxy.address, 0x0), 4)
 
     await proxy.changeImplementation(logic2.address)
-    await proxyAsLogic2.changeX(3)
-    assert.equal(await logic2.x(), 6)
 
+    await proxyAsLogic2.changeX(50)
     await proxyAsLogic2.tripleX()
-    assert.equal(await logic2.x(), 18)
+
+    // assert.equal(await lookupInt(proxy.address, 0x0), 50)
+
+    assert.equal(await lookupInt(proxy.address, 0x0), 150)
   })
 })

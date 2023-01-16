@@ -4,6 +4,7 @@ pragma solidity ^0.8.17;
 import "./StorageSlot.sol";
 
 contract Proxy {
+    uint x = 0;
     address implementation;
 
     function changeImplementation(address _implementation) external {
@@ -11,13 +12,13 @@ contract Proxy {
     }
 
     fallback() external {
-        (bool s, ) = implementation.call(msg.data);
+        (bool s, ) = implementation.delegatecall(msg.data);
         require(s);
     }
 }
 
 contract Logic1 {
-    uint public x = 0;
+    uint x = 0;
 
     function changeX(uint _x) external {
         x = _x;
@@ -25,10 +26,10 @@ contract Logic1 {
 }
 
 contract Logic2 {
-    uint public x = 0;
+    uint x = 0;
 
     function changeX(uint _x) external {
-        x = _x * 2;
+        x = _x;
     }
 
     function tripleX() external {
